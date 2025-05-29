@@ -37,12 +37,12 @@ describe('Central de atendimento ao Cliente TAT', () => {
       .should('have.value', '')
   })
 
-  it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido', () => {
+  it.only('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido', () => {
     cy.get('#firstName').type('Matheus')
     cy.get('#lastName').type('Souza')
     cy.get('#email').type('matheussouza@gmail.com')
     cy.get('#open-text-area').type('teste')
-    cy.get('#phone-checkbox').click()
+    cy.get('#phone-checkbox').check()
     cy.contains('button', 'Enviar').click()
 
     cy.get('.error').should('be.visible')
@@ -110,5 +110,51 @@ describe('Central de atendimento ao Cliente TAT', () => {
           .check()
           .should('be.checked')
       })
+  })
+
+  it.only('marca ambos checkboxes, depois desmarca o último', () => {
+    cy.get('input[type="checkbox"]')
+      .check()
+      .should('be.checked')
+      .last()
+      .uncheck()
+      .should('not.be.checked')
+  })
+
+  it.only('seleciona um arquivo da pasta fixtures', () => {
+    cy.get('#file-upload')
+    .selectFile('./cypress/fixtures/example.json')
+      .should(input => {
+        expect(input[0].files[0].name).to.equal('example.json')
+      })
+  })
+  it('seleciona um arquivo simulando um drag-and-drop', () => {
+    cy.get('#file-upload')
+      .selectFile('./cypress/fixtures/example.json', { action: 'drag-drop' })
+      .should(input => {
+        expect(input[0].files[0].name).to.equal('example.json')
+      })
+  })
+
+  it.only('seleciona um arquivo utilizando uma fixture para a qual foi dada um alias', () => {
+    cy.fixture('example.json').as('sampleFile')
+    cy.get('#file-upload')
+      .selectFile('@sampleFile')
+      .should(input => {
+        expect(input[0].files[0].name).to.equal('example.json')
+      })
+  })
+
+  it.only('verifica que a política de privacidade abre em outra aba sem precisar de um clique', () => {
+    cy.contains('a', 'Política de Privacidade')
+      .should('have.attr', 'href', 'privacy.html')
+      .should('have.attr', 'target', '_blank')
+    })
+
+  it.only('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
+    cy.contains('a', 'Política de Privacidade')
+      .invoke('removeAttr', 'target')
+      .click()
+      cy.contains('h1', 'Política de Privacidade').should('be.visible')
   })
 })
